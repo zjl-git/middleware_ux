@@ -1,4 +1,5 @@
 #include "ux_manager.h"
+#include "ux_activity.h"
 #include "ux_message_queue.h"
 
 ux_manager_handler *g_manager_handler;
@@ -58,13 +59,80 @@ void ux_remove_event(uint32_t event_group, uint32_t event_id)
     g_manager_handler->handler.remove_msg(&(g_manager_handler->handler), event_group, event_id);
 }
 
-
-
-
-void ux_test(void)
+void ux_set_pre_proc_func(ux_proc_event_func_t proc_func)
 {
-    ux_msg *msg = g_manager_handler->handler.msg_queue->remove_top_msg(g_manager_handler->handler.msg_queue);
-    while (msg) {
-        msg = g_manager_handler->handler.msg_queue->remove_top_msg(g_manager_handler->handler.msg_queue);
+    if (g_manager_handler) {
+        UX_LOG_E("ux shell has already started, cannot call ui_shell_set_pre_proc_func");
+        return ;
     }
+
+    ux_activity_internal *activity = ux_activity_get_preproc_item();
+    if (activity == NULL) {
+        UX_LOG_E("new preproc item failed");
+        return;
+    }
+
+    activity->activity_type = UX_ACTIVITY_PRE_PROC;
+    activity->proc_event_func = proc_func;
+    activity->priority = UX_ACTIVITY_PRIORITY_HIGHEST;
+    ux_activity_add(activity, NULL, 0);
+}
+
+void ux_start_activity(ux_activity_context *self, ux_proc_event_func_t proc_func, 
+                       ux_activity_priority priority, void *extra_data, uint32_t data_len)
+{
+    ux_activity_internal *activity = NULL;
+    ux_msg msg;
+
+    if (g_manager_handler == NULL && priority > UX_ACTIVITY_PRIORITY_IDLE_TOP) {
+        UX_LOG_E("ux not started, priority > top");
+        return ;
+    }
+
+    if (proc_func == NULL || priority > UX_ACTIVITY_PRIORITY_HIGHEST) {
+        UX_LOG_E("func is null or priority > highest");
+        return ;
+    }
+
+    activity = ux_activity_get_free_item();
+    if (activity == NULL) {
+        UX_LOG_E("new free item failed");
+        return ;
+    }
+
+    if (priority <= UX_ACTIVITY_PRIORITY_IDLE_TOP) {
+        activity->activity_type = UX_ACTIVITY_IDLE;
+    } else {
+        activity->activity_type = UX_ACTIVITY_TRANSIENT;
+    }
+    activity->proc_event_func = proc_func;
+    activity->priority = priority;
+    activity->started_by = (ux_activity_internal *)self;
+
+    if (g_manager_handler == NULL) {
+        ux_activity_add(activity, NULL, 0);
+    } else {
+        ux_message_queue_input_msg(&msg, UX_ACTIVITY_EVENT_PRIORITY_SYSTEM, UX_ACTIVITY_SYSTEM, 
+                                    UX_ACTIVITY_SYSTEM_EVENT_ID_RESUME, extra_data, data_len, activity, 0, NULL);
+        g_manager_handler->handler.send_msg(&(g_manager_handler->handler), false, &msg);
+    }
+}
+
+void ux_finish_activity(ux_activity_context *self, ux_activity_context *target_activity)
+{
+    ux_msg msg;
+    if (g_manager_handler == NULL) {
+        UX_LOG_E("should not call finish activity before ui shell running");
+        return;
+    }
+
+    if (target_activity == NULL) {
+        UX_LOG_E("target activity is null");
+        return;
+    }
+
+    ux_message_queue_input_msg(&msg, UX_ACTIVITY_EVENT_PRIORITY_SYSTEM, UX_ACTIVITY_SYSTEM, 
+                                UX_ACTIVITY_SYSTEM_EVENT_ID_PAUSE, NULL, 0, target_activity, 0, NULL);
+    g_manager_handler->handler.send_msg(&(g_manager_handler->handler), false, &msg);
+
 }

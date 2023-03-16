@@ -11,6 +11,17 @@ static void ux_manager_handle_msg(ux_msg_handler *handler, ux_msg *msg)
             activity = (ux_activity_internal *)msg->msg_data2;
             switch (msg->msg_id) {
                 case UX_ACTIVITY_SYSTEM_EVENT_ID_CREATE:
+                    ux_activity_start();
+                    break;
+
+                case UX_ACTIVITY_SYSTEM_EVENT_ID_RESUME:
+                    ux_activity_add(activity, msg->msg_data, msg->msg_data_len);
+                    if (msg->msg_data && msg->msg_data_len) {
+                        ux_ports_free(msg->msg_data);
+                    }
+                    break;
+
+                case UX_ACTIVITY_SYSTEM_EVENT_ID_PAUSE:
                     break;
 
                 default:
@@ -19,6 +30,10 @@ static void ux_manager_handle_msg(ux_msg_handler *handler, ux_msg *msg)
             break;
 
         default:
+            ux_activity_traverse(msg->msg_group, msg->msg_id, msg->msg_data, msg->msg_data_len);
+            UX_LOG_I("handle message group end: 0x%x, id : 0x%x, extra_data : 0x%x, data_len : 0x%x, free_func : 0x%x",
+                      msg->msg_group, msg->msg_id, msg->msg_data, msg->msg_data_len, msg->special_free_extra_func);
+
             if (msg->msg_data || msg->msg_data_len) {
                 if (msg->special_free_extra_func) {
                     msg->special_free_extra_func(msg->msg_data);

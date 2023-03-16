@@ -73,6 +73,20 @@ typedef  struct _ux_activity_internal {
     ux_proc_event_func_t proc_event_func;                   /*The process event callback function, must be implemented by AP*/
 } ux_activity_internal;
 
+ux_activity_internal *ux_activity_get_preproc_item(void);
+
+ux_activity_internal *ux_activity_get_free_item(void);
+
+void ux_activity_free_item(ux_activity_internal *activity);
+
+bool ux_activity_add(ux_activity_internal *activity, void *data, size_t data_len);
+
+void ux_activity_remove(ux_activity_internal *activity);
+
+void ux_activity_start(void);
+
+void ux_activity_traverse(uint32_t event_group, uint32_t event_id, void *data, uint32_t data_len);
+
 #ifdef __cplusplus
 }
 #endif

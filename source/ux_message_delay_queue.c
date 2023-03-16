@@ -13,7 +13,7 @@ static void _test_printf(ux_delay_msg_queue *msg_queue)
     UX_LOG_D("*******************************************************");
 }
 
-/*a > b*/
+/*a >= b*/
 static bool ux_message_is_time_larger(uint32_t a, uint32_t b)
 {
     return ((a > b) && (a - b < (1 << 31))) || ((b > a) && (b - a > (1 << 31)));
@@ -54,6 +54,7 @@ static void ux_message_push_delay_msg(ux_delay_msg_queue *msg_queue, ux_delay_ms
                 } else {
                     msg_queue->parent.top = &msg->basic_msg;
                 }
+                break;
             } else {
                 last_msg  = current_msg;
                 current_msg = (ux_delay_msg *)current_msg->basic_msg.next_msg;
@@ -78,7 +79,7 @@ static ux_delay_msg *ux_message_remove_timeout_msg(ux_delay_msg_queue *msg_queue
     ux_ports_synchronized(&sync_mask);
 
     for (temp = (ux_delay_msg *)msg_queue->parent.top; temp; temp = (ux_delay_msg *)temp->basic_msg.next_msg) {
-        if (ux_message_is_time_larger(current, temp->msg_act_time)) {
+        if (ux_message_is_time_larger(current, temp->msg_act_time) || current == temp->msg_act_time) {
             timeout_msg_count++;
             last_temp = temp;
         } else {
@@ -118,6 +119,7 @@ static uint32_t ux_message_get_next_timeout(ux_delay_msg_queue *msg_queue)
         ret = UX_PORT_MAX_DELAY;
     }
 
+    UX_LOG_D("current time:%d, next timeout:%d \n", ux_ports_get_currents_ms(), ret);
     ux_ports_synchronized_end(sync_mask);
     return ret;
 }
@@ -152,4 +154,6 @@ void ux_message_delay_queue_input_msg(ux_delay_msg *input_msg, uint8_t priority,
 
     ux_message_queue_input_msg(&input_msg->basic_msg, priority, group, id, data, data_len, data2, data_len2, special_free_extra_func);
     input_msg->msg_act_time = ux_ports_get_currents_ms() + delay_ms;
+    UX_LOG_D("now ms: %d, act time:%d", ux_ports_get_currents_ms(), input_msg->msg_act_time);
+
 }

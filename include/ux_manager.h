@@ -24,6 +24,11 @@ void ux_send_event(bool from_isr, ux_activity_event_priority priority, uint32_t 
                    void *data, uint32_t data_len, void(*special_free_extra_func)(void), uint32_t delay_ms);
 
 void ux_remove_event(uint32_t event_group, uint32_t event_id);
+
+void ux_set_pre_proc_func(ux_proc_event_func_t proc_func);
+
+void ux_start_activity(ux_activity_context *self, ux_proc_event_func_t proc_func, 
+                       ux_activity_priority priority, void *extra_data, uint32_t data_len);
 #ifdef __cplusplus
 }
 #endif
