@@ -4,6 +4,7 @@
 static void _test_printf(ux_msg_queue *msg_queue)
 {
     ux_msg *msg;
+    UX_LOG_D("length : %d", msg_queue->length);
     UX_LOG_D("--------------------------------------------------------");
     msg = msg_queue->top;
     while (msg) {
@@ -58,7 +59,7 @@ static void push_msg(ux_msg_queue *msg_queue, bool from_isr, ux_msg *input_msg)
     msg_queue->length++;
 
     ux_ports_synchronized_end(sync_mask);
-    UX_LOG_D("length : %d", msg_queue->length);
+
     _test_printf(msg_queue);
 }
 
@@ -122,7 +123,6 @@ static void remove_msg(ux_msg_queue *msg_queue, uint32_t group, uint32_t id)
 
     ux_ports_synchronized_end(sync_mask);
 
-    UX_LOG_D("length : %d", msg_queue->length);
     _test_printf(msg_queue);
 }
 
@@ -147,9 +147,6 @@ static ux_msg *remove_top_msg(ux_msg_queue *msg_queue)
     }
 
     ux_ports_synchronized_end(sync_mask);
-
-    // UX_LOG_D("length : %d", msg_queue->length);
-    // _test_printf(msg_queue);
     return temp;
 }
 

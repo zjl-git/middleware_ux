@@ -37,7 +37,9 @@ void ux_send_event(bool from_isr, ux_activity_event_priority priority, uint32_t 
 
     UX_LOG_D("send event: 0x%x, 0x%x, delay:%d", event_group, event_id, delay_ms);
     if (delay_ms != 0) {
-
+        ux_delay_msg msg;
+        ux_message_delay_queue_input_msg(&msg, priority, event_group, event_id, data, data_len, NULL, 0, NULL, delay_ms);
+        g_manager_handler->handler.send_delay_msg(&(g_manager_handler->handler), from_isr, &msg);
     } else {
         ux_msg msg;
         ux_message_queue_input_msg(&msg, priority, event_group, event_id, data, data_len, NULL, 0, NULL);

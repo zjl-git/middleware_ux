@@ -7,6 +7,7 @@ extern "C" {
 
 #include "ux_ports.h"
 #include "ux_message_queue.h"
+#include "ux_message_delay_queue.h"
 
 enum {
     UX_INTERNAL_EVENT_SYSTEM_START,
@@ -22,12 +23,12 @@ enum {
 
 typedef struct _ux_msg_handler {
     void (*send_msg)(struct _ux_msg_handler *handler, bool from_isr, ux_msg *input_msg);
-    // void (*send_delay_msg)(struct _ux_msg_handler *handler, bool from_isr, ux_delay_msg *input_msg);
+    void (*send_delay_msg)(struct _ux_msg_handler *handler, bool from_isr, ux_delay_msg *input_msg);
     void (*handle_msg)(struct _ux_msg_handler *handler, ux_msg *msg);
     void (*remove_msg)(struct _ux_msg_handler *handler, uint32_t event_group, uint32_t event_id);
 
     ux_msg_queue *msg_queue;
-    // ux_delay_msg_queue *delay_msg_queue;
+    ux_delay_msg_queue *delay_msg_queue;
 
     void *semaphore;
 } ux_msg_handler;
