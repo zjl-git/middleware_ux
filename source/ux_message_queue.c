@@ -4,11 +4,12 @@
 static void _test_printf(ux_msg_queue *msg_queue)
 {
     ux_msg *msg;
-    UX_LOG_D("length : %d", msg_queue->length);
+    
     UX_LOG_D("--------------------------------------------------------");
+    UX_LOG_D("queue length : %d", msg_queue->length);
     msg = msg_queue->top;
     while (msg) {
-        UX_LOG_D("test printf prio:%d, group:%d id:%d, data_len:%d", msg->msg_priority, msg->msg_group, msg->msg_id, msg->msg_data_len);
+        UX_LOG_D("queue test printf prio:%d, group:%d id:%d, data_len:%d", msg->msg_priority, msg->msg_group, msg->msg_id, msg->msg_data_len);
         msg = msg->next_msg;
     }
     UX_LOG_D("--------------------------------------------------------");
@@ -36,17 +37,12 @@ static void push_msg(ux_msg_queue *msg_queue, bool from_isr, ux_msg *input_msg)
 
     ux_ports_synchronized(&sync_mask);
 
-    UX_LOG_D("%d, %d, %d, %d, %d, %d", msg_queue->last_of_priority[0] != NULL, msg_queue->last_of_priority[1] != NULL, 
-             msg_queue->last_of_priority[2] != NULL, msg_queue->last_of_priority[3] != NULL, msg_queue->last_of_priority[4] != NULL,
-             msg_queue->last_of_priority[5] != NULL);
-
     for (i = msg->msg_priority; i <= UX_ACTIVITY_EVENT_PRIORITY_SYSTEM; i++) {
         if (msg_queue->last_of_priority[i] != NULL) {    
             break;
         }
     }
 
-    UX_LOG_D("i:%d", i);
     if (i <= UX_ACTIVITY_EVENT_PRIORITY_SYSTEM) {
         msg->next_msg = msg_queue->last_of_priority[i]->next_msg;
         msg_queue->last_of_priority[i]->next_msg = msg;

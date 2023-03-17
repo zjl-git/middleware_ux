@@ -10,18 +10,23 @@ static void ux_manager_handle_msg(ux_msg_handler *handler, ux_msg *msg)
         case UX_ACTIVITY_SYSTEM:
             activity = (ux_activity_internal *)msg->msg_data2;
             switch (msg->msg_id) {
-                case UX_ACTIVITY_SYSTEM_EVENT_ID_CREATE:
+                case UX_ACTIVITY_SYSTEM_EVENT_ID_SYSTEM_START:
                     ux_activity_start();
                     break;
 
-                case UX_ACTIVITY_SYSTEM_EVENT_ID_RESUME:
+                case UX_ACTIVITY_SYSTEM_EVENT_ID_START_ACTI:
                     ux_activity_add(activity, msg->msg_data, msg->msg_data_len);
                     if (msg->msg_data && msg->msg_data_len) {
                         ux_ports_free(msg->msg_data);
                     }
                     break;
 
-                case UX_ACTIVITY_SYSTEM_EVENT_ID_PAUSE:
+                case UX_ACTIVITY_SYSTEM_EVENT_ID_FINISH_ACTI:
+                    ux_activity_remove(activity);
+                    break;
+
+                case UX_ACTIVITY_SYSTEM_EVENT_ID_SET_RESULT:
+                    ux_activity_set_result(activity, msg->msg_data, msg->msg_data_len);
                     break;
 
                 default:

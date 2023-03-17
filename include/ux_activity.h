@@ -38,14 +38,12 @@ typedef enum {
 } ux_activity_event_group;
 
 typedef enum {
-    UX_ACTIVITY_SYSTEM_EVENT_ID_CREATE,                    /*created and will be added*/
-    UX_ACTIVITY_SYSTEM_EVENT_ID_DESTROY,                   /*destroy and removed form activity stack*/
-    UX_ACTIVITY_SYSTEM_EVENT_ID_RESUME,                    /*resuming*/
-    UX_ACTIVITY_SYSTEM_EVENT_ID_PAUSE,                     /*pausing*/
-    UX_ACTIVITY_SYSTEM_EVENT_ID_RESULT,                    /*receiving a result*/
-    UX_ACTIVITY_SYSTEM_EVENT_ID_REFRESH,                   /*refreshing*/
-    UX_ACTIVITY_SYSTEM_EVENT_ID_REQUEST_ALLOWANCE,         /*receiving an allowance request*/
-    UX_ACTIVITY_SYSTEM_EVENT_ID_ALLOW,                     /*allowance request is allowed*/
+    UX_ACTIVITY_SYSTEM_EVENT_ID_SYSTEM_START,                   /*created and will be added*/
+    UX_ACTIVITY_SYSTEM_EVENT_ID_SYSTEM_STOP,                    /*destroy and removed form activity stack*/
+    UX_ACTIVITY_SYSTEM_EVENT_ID_START_ACTI,                     /*resuming*/
+    UX_ACTIVITY_SYSTEM_EVENT_ID_FINISH_ACTI,                    /*pausing*/
+    UX_ACTIVITY_SYSTEM_EVENT_ID_SET_RESULT,                     /*receiving a result*/
+    UX_ACTIVITY_SYSTEM_EVENT_ID_TRIGGER_REFRESH,                /*refreshing*/
 } ux_activity_event_id;
 
 typedef enum {
@@ -84,6 +82,8 @@ bool ux_activity_add(ux_activity_internal *activity, void *data, size_t data_len
 void ux_activity_remove(ux_activity_internal *activity);
 
 void ux_activity_start(void);
+
+void ux_activity_set_result(ux_activity_internal *target_acti, void *data, uint32_t data_len);
 
 void ux_activity_traverse(uint32_t event_group, uint32_t event_id, void *data, uint32_t data_len);
 

@@ -3,11 +3,11 @@
 static void _test_printf(ux_delay_msg_queue *msg_queue)
 {
     ux_delay_msg *msg;
-    UX_LOG_D("length : %d", msg_queue->parent.length);
     UX_LOG_D("*******************************************************");
+    UX_LOG_D("delay queue length : %d", msg_queue->parent.length);
     msg = (ux_delay_msg *)msg_queue->parent.top;
     while (msg) {
-        UX_LOG_D("test printf time:%d, group:%d id:%d", msg->msg_act_time, msg->basic_msg.msg_group, msg->basic_msg.msg_id);
+        UX_LOG_D("delay queue test printf time:%d, group:%d id:%d", msg->msg_act_time, msg->basic_msg.msg_group, msg->basic_msg.msg_id);
         msg = (ux_delay_msg *)msg->basic_msg.next_msg;
     }
     UX_LOG_D("*******************************************************");

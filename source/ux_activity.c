@@ -65,20 +65,20 @@ bool ux_activity_add(ux_activity_internal *activity, void *data, size_t data_len
     if (g_already_started) {
         if (*acti == g_acti_list && g_acti_list) {  /*this activity is next foreground activity*/
             /*pause last foreground activity*/
-            g_acti_list->proc_event_func(&(g_acti_list->external_activity), UX_ACTIVITY_SYSTEM, UX_ACTIVITY_SYSTEM_EVENT_ID_PAUSE, NULL, 0);
+            g_acti_list->proc_event_func(&(g_acti_list->external_activity), UX_ACTIVITY_SYSTEM, UX_ACTIVITY_SYSTEM_EVENT_ID_FINISH_ACTI, NULL, 0);
         }
 
-        ret = activity->proc_event_func(&(activity->external_activity), UX_ACTIVITY_SYSTEM, UX_ACTIVITY_SYSTEM_EVENT_ID_CREATE, data, data_len);
+        ret = activity->proc_event_func(&(activity->external_activity), UX_ACTIVITY_SYSTEM, UX_ACTIVITY_SYSTEM_EVENT_ID_SYSTEM_START, data, data_len);
         if (ret) {
             /*if priority of *acti is lower than current, new activity is next foreground activity*/
             if (*acti == g_acti_list) {
-                activity->proc_event_func(&(activity->external_activity), UX_ACTIVITY_SYSTEM, UX_ACTIVITY_SYSTEM_EVENT_ID_RESUME, NULL, 0);
+                activity->proc_event_func(&(activity->external_activity), UX_ACTIVITY_SYSTEM, UX_ACTIVITY_SYSTEM_EVENT_ID_START_ACTI, NULL, 0);
             }
         } else {
             UX_LOG_E("On create failed in activity = %x", 1, activity->proc_event_func);
             if (*acti == g_acti_list && g_acti_list) {  /*resume from pause status*/
-                g_acti_list->proc_event_func(&(g_acti_list->external_activity), UX_ACTIVITY_SYSTEM, UX_ACTIVITY_SYSTEM_EVENT_ID_RESUME, NULL, 0);
-                g_acti_list->proc_event_func(&(g_acti_list->external_activity), UX_ACTIVITY_SYSTEM, UX_ACTIVITY_SYSTEM_EVENT_ID_REFRESH, NULL, 0);
+                g_acti_list->proc_event_func(&(g_acti_list->external_activity), UX_ACTIVITY_SYSTEM, UX_ACTIVITY_SYSTEM_EVENT_ID_START_ACTI, NULL, 0);
+                g_acti_list->proc_event_func(&(g_acti_list->external_activity), UX_ACTIVITY_SYSTEM, UX_ACTIVITY_SYSTEM_EVENT_ID_TRIGGER_REFRESH, NULL, 0);
             }
         }
     } else {
@@ -115,9 +115,9 @@ void ux_activity_remove(ux_activity_internal *activity)
     for (temp_acti = g_acti_list; temp_acti != NULL && temp_acti->activity_type == UX_ACTIVITY_TRANSIENT; temp_acti = temp_acti->next) {
         if (temp_acti == activity) {
             if (activity == g_acti_list) {
-                activity->proc_event_func(&(activity->external_activity), UX_ACTIVITY_SYSTEM, UX_ACTIVITY_SYSTEM_EVENT_ID_PAUSE, NULL, 0);
+                activity->proc_event_func(&(activity->external_activity), UX_ACTIVITY_SYSTEM, UX_ACTIVITY_SYSTEM_EVENT_ID_FINISH_ACTI, NULL, 0);
             }
-            ret = activity->proc_event_func(&(activity->external_activity), UX_ACTIVITY_SYSTEM, UX_ACTIVITY_SYSTEM_EVENT_ID_DESTROY, NULL, 0);
+            ret = activity->proc_event_func(&(activity->external_activity), UX_ACTIVITY_SYSTEM, UX_ACTIVITY_SYSTEM_EVENT_ID_SYSTEM_STOP, NULL, 0);
             break;
         }
     }
@@ -138,9 +138,9 @@ void ux_activity_remove(ux_activity_internal *activity)
         /*activity has been removed from list*/
         if (activity->next == g_acti_list && g_acti_list) {
             g_acti_list->proc_event_func(&(g_acti_list->external_activity), UX_ACTIVITY_EVENT_PRIORITY_SYSTEM,
-                                      UX_ACTIVITY_SYSTEM_EVENT_ID_RESUME, NULL, 0);
+                                      UX_ACTIVITY_SYSTEM_EVENT_ID_START_ACTI, NULL, 0);
             g_acti_list->proc_event_func(&(g_acti_list->external_activity), UX_ACTIVITY_EVENT_PRIORITY_SYSTEM,
-                                      UX_ACTIVITY_SYSTEM_EVENT_ID_REFRESH, NULL, 0);
+                                      UX_ACTIVITY_SYSTEM_EVENT_ID_TRIGGER_REFRESH, NULL, 0);
         }
         ux_activity_free_item(activity);
     } else {
@@ -157,19 +157,30 @@ void ux_activity_start(void)
     }
 
     if (g_pre_proc_acti) {
-        g_pre_proc_acti->proc_event_func(&g_pre_proc_acti->external_activity, UX_ACTIVITY_SYSTEM, UX_ACTIVITY_SYSTEM_EVENT_ID_CREATE, NULL, 0);
+        g_pre_proc_acti->proc_event_func(&g_pre_proc_acti->external_activity, UX_ACTIVITY_SYSTEM, UX_ACTIVITY_SYSTEM_EVENT_ID_SYSTEM_START, NULL, 0);
     }
 
     for (temp_acti = g_acti_list; temp_acti != NULL; temp_acti = temp_acti->next) {
-        temp_acti->proc_event_func(&temp_acti->external_activity, UX_ACTIVITY_SYSTEM, UX_ACTIVITY_SYSTEM_EVENT_ID_CREATE, NULL, 0);
+        temp_acti->proc_event_func(&temp_acti->external_activity, UX_ACTIVITY_SYSTEM, UX_ACTIVITY_SYSTEM_EVENT_ID_SYSTEM_START, NULL, 0);
     }
 
     /*refresh the first idel activity*/
     if (g_acti_list) {
-        g_acti_list->proc_event_func(&g_acti_list->external_activity, UX_ACTIVITY_SYSTEM, UX_ACTIVITY_SYSTEM_EVENT_ID_REFRESH, NULL, 0);
+        g_acti_list->proc_event_func(&g_acti_list->external_activity, UX_ACTIVITY_SYSTEM, UX_ACTIVITY_SYSTEM_EVENT_ID_TRIGGER_REFRESH, NULL, 0);
     }
 
     g_already_started = true;
+}
+
+void ux_activity_set_result(ux_activity_internal *target_acti, void *data, uint32_t data_len)
+{
+    ux_activity_internal *temp_acti = g_acti_list;
+
+    for (temp_acti = g_acti_list; temp_acti != NULL; temp_acti = temp_acti->next) {
+        if (temp_acti == target_acti) {
+            target_acti->proc_event_func(&target_acti->external_activity, UX_ACTIVITY_SYSTEM, UX_ACTIVITY_SYSTEM_EVENT_ID_SET_RESULT, data, data_len);
+        }
+    }
 }
 
 void ux_activity_traverse(uint32_t event_group, uint32_t event_id, void *data, uint32_t data_len)

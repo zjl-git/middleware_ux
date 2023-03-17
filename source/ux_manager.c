@@ -19,7 +19,7 @@ void ux_start(void)
     }
 
     ux_message_queue_input_msg(&msg, UX_ACTIVITY_EVENT_PRIORITY_SYSTEM, UX_ACTIVITY_SYSTEM, 
-                               UX_ACTIVITY_SYSTEM_EVENT_ID_CREATE, NULL, 0, NULL, 0, NULL);
+                               UX_ACTIVITY_SYSTEM_EVENT_ID_SYSTEM_START, NULL, 0, NULL, 0, NULL);
     g_manager_handler->handler.send_msg(&(g_manager_handler->handler), false, &msg);
 }
 
@@ -113,7 +113,7 @@ void ux_start_activity(ux_activity_context *self, ux_proc_event_func_t proc_func
         ux_activity_add(activity, NULL, 0);
     } else {
         ux_message_queue_input_msg(&msg, UX_ACTIVITY_EVENT_PRIORITY_SYSTEM, UX_ACTIVITY_SYSTEM, 
-                                    UX_ACTIVITY_SYSTEM_EVENT_ID_RESUME, extra_data, data_len, activity, 0, NULL);
+                                    UX_ACTIVITY_SYSTEM_EVENT_ID_START_ACTI, extra_data, data_len, activity, 0, NULL);
         g_manager_handler->handler.send_msg(&(g_manager_handler->handler), false, &msg);
     }
 }
@@ -132,7 +132,26 @@ void ux_finish_activity(ux_activity_context *self, ux_activity_context *target_a
     }
 
     ux_message_queue_input_msg(&msg, UX_ACTIVITY_EVENT_PRIORITY_SYSTEM, UX_ACTIVITY_SYSTEM, 
-                                UX_ACTIVITY_SYSTEM_EVENT_ID_PAUSE, NULL, 0, target_activity, 0, NULL);
+                                UX_ACTIVITY_SYSTEM_EVENT_ID_FINISH_ACTI, NULL, 0, target_activity, 0, NULL);
     g_manager_handler->handler.send_msg(&(g_manager_handler->handler), false, &msg);
+}
 
+void ux_set_result(ux_activity_context *self, void *data, uint32_t data_len)
+{
+    ux_msg msg;
+    ux_activity_internal *internal_self = (ux_activity_internal *)self;
+
+    if (g_manager_handler == NULL) {
+        UX_LOG_E("should not call set_result before ui shell running");
+        return;
+    }
+
+    if (internal_self == NULL || internal_self->started_by == NULL) {
+        UX_LOG_E("this activity have no trunk activity");
+        return;
+    }
+
+    ux_message_queue_input_msg(&msg, UX_ACTIVITY_EVENT_PRIORITY_SYSTEM, UX_ACTIVITY_SYSTEM, 
+                                UX_ACTIVITY_SYSTEM_EVENT_ID_SET_RESULT, data, data_len, internal_self->started_by, 0, NULL);
+    g_manager_handler->handler.send_msg(&(g_manager_handler->handler), false, &msg);
 }

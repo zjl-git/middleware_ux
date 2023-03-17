@@ -29,6 +29,11 @@ void ux_set_pre_proc_func(ux_proc_event_func_t proc_func);
 
 void ux_start_activity(ux_activity_context *self, ux_proc_event_func_t proc_func, 
                        ux_activity_priority priority, void *extra_data, uint32_t data_len);
+
+void ux_finish_activity(ux_activity_context *self, ux_activity_context *target_activity);
+
+void ux_set_result(ux_activity_context *self, void *data, uint32_t data_len);
+
 #ifdef __cplusplus
 }
 #endif
