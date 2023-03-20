@@ -155,3 +155,21 @@ void ux_set_result(ux_activity_context *self, void *data, uint32_t data_len)
                                 UX_ACTIVITY_SYSTEM_EVENT_ID_SET_RESULT, data, data_len, internal_self->started_by, 0, NULL);
     g_manager_handler->handler.send_msg(&(g_manager_handler->handler), false, &msg);
 }
+
+void ux_refresh_activity(ux_activity_context *self, ux_activity_context *target)
+{
+    ux_msg msg;
+    if (g_manager_handler == NULL) {
+        UX_LOG_E("should not call set_result before ui shell running");
+        return;
+    }
+
+    if (target == NULL) {
+        UX_LOG_E("target is NULL");
+        return;
+    }
+
+    ux_message_queue_input_msg(&msg, UX_ACTIVITY_EVENT_PRIORITY_SYSTEM, UX_ACTIVITY_SYSTEM, 
+                                UX_ACTIVITY_SYSTEM_EVENT_ID_TRIGGER_REFRESH, NULL, 0, target, 0, NULL);
+    g_manager_handler->handler.send_msg(&(g_manager_handler->handler), false, &msg);
+}

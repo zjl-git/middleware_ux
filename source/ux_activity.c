@@ -183,6 +183,16 @@ void ux_activity_set_result(ux_activity_internal *target_acti, void *data, uint3
     }
 }
 
+void ux_activity_refresh_activity(ux_activity_internal *target_acti)
+{
+    if (g_acti_list != target_acti) {
+        UX_LOG_I("target activity is not the top activity, so ignore the refresh request");
+        return;
+    }
+
+    target_acti->proc_event_func(&target_acti->external_activity, UX_ACTIVITY_SYSTEM, UX_ACTIVITY_SYSTEM_EVENT_ID_TRIGGER_REFRESH, NULL, 0);
+}
+
 void ux_activity_traverse(uint32_t event_group, uint32_t event_id, void *data, uint32_t data_len)
 {
     bool ret = false;

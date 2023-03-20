@@ -85,6 +85,8 @@ void ux_activity_start(void);
 
 void ux_activity_set_result(ux_activity_internal *target_acti, void *data, uint32_t data_len);
 
+void ux_activity_refresh_activity(ux_activity_internal *target_acti);
+
 void ux_activity_traverse(uint32_t event_group, uint32_t event_id, void *data, uint32_t data_len);
 
 #ifdef __cplusplus

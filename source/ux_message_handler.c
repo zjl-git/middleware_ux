@@ -29,6 +29,10 @@ static void ux_manager_handle_msg(ux_msg_handler *handler, ux_msg *msg)
                     ux_activity_set_result(activity, msg->msg_data, msg->msg_data_len);
                     break;
 
+                case UX_ACTIVITY_SYSTEM_EVENT_ID_TRIGGER_REFRESH:
+                    ux_activity_refresh_activity(activity);
+                    break;
+
                 default:
                     break;
             }

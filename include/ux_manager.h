@@ -34,6 +34,8 @@ void ux_finish_activity(ux_activity_context *self, ux_activity_context *target_a
 
 void ux_set_result(ux_activity_context *self, void *data, uint32_t data_len);
 
+void ux_refresh_activity(ux_activity_context *self, ux_activity_context *target);
+
 #ifdef __cplusplus
 }
 #endif
