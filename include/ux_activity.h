@@ -44,6 +44,8 @@ typedef enum {
     UX_ACTIVITY_SYSTEM_EVENT_ID_FINISH_ACTI,                    /*pausing*/
     UX_ACTIVITY_SYSTEM_EVENT_ID_SET_RESULT,                     /*receiving a result*/
     UX_ACTIVITY_SYSTEM_EVENT_ID_TRIGGER_REFRESH,                /*refreshing*/
+    UX_ACTIVITY_SYSTEM_EVENT_ID_REQUEST_ALLOWANCE,              /*request allowance*/
+    UX_ACTIVITY_SYSTEM_EVENT_ID_ON_ALLOWANCE,              /*on allowance*/
 } ux_activity_event_id;
 
 typedef enum {
