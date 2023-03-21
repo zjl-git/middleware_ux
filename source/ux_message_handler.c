@@ -27,10 +27,21 @@ static void ux_manager_handle_msg(ux_msg_handler *handler, ux_msg *msg)
 
                 case UX_ACTIVITY_SYSTEM_EVENT_ID_SET_RESULT:
                     ux_activity_set_result(activity, msg->msg_data, msg->msg_data_len);
+                    if (msg->msg_data && msg->msg_data_len) {
+                        ux_ports_free(msg->msg_data);
+                    }
                     break;
 
                 case UX_ACTIVITY_SYSTEM_EVENT_ID_TRIGGER_REFRESH:
                     ux_activity_refresh_activity(activity);
+                    break;
+
+                case UX_ACTIVITY_SYSTEM_EVENT_ID_REQUEST_ALLOWANCE:
+                    ux_activity_request_allowance((uint32_t)msg->msg_data, (ux_activity_internal *)msg->msg_data2);
+                    break;
+
+                case UX_ACTIVITY_SYSTEM_EVENT_ID_ON_ALLOWANCE:
+                    ux_activity_allowed((uint32_t)msg->msg_data, (ux_activity_internal *)msg->msg_data2);
                     break;
 
                 default:

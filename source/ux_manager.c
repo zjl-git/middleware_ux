@@ -156,6 +156,46 @@ void ux_set_result(ux_activity_context *self, void *data, uint32_t data_len)
     g_manager_handler->handler.send_msg(&(g_manager_handler->handler), false, &msg);
 }
 
+void ux_request_allowance(ux_activity_context *self, uint32_t request_id)
+{
+    ux_msg msg;
+    if (g_manager_handler == NULL) {
+        UX_LOG_E("should not call request allowed before ui shell running");
+        return;
+    }
+
+    if (self == NULL) {
+        UX_LOG_E("self is null");
+        return;
+    }
+
+    ux_message_queue_input_msg(&msg, UX_ACTIVITY_EVENT_PRIORITY_SYSTEM, UX_ACTIVITY_SYSTEM, 
+                                UX_ACTIVITY_SYSTEM_EVENT_ID_REQUEST_ALLOWANCE, (void *)request_id, 0, (void *)self, 0, NULL);
+    g_manager_handler->handler.send_msg(&(g_manager_handler->handler), false, &msg);
+}
+
+void ux_grant_allowance(ux_activity_context *self, uint32_t request_id)
+{
+    ux_msg msg;
+    ux_activity_internal *acti_need_notify = NULL;
+    if (g_manager_handler == NULL) {
+        UX_LOG_E("should not call grant allowed before ui shell running");
+        return;
+    }
+
+    if (self == NULL) {
+        UX_LOG_E("self is null");
+        return;
+    }
+
+    acti_need_notify = ux_activity_allow((ux_activity_internal *)self, request_id);
+    if (acti_need_notify) {
+       ux_message_queue_input_msg(&msg, UX_ACTIVITY_EVENT_PRIORITY_SYSTEM, UX_ACTIVITY_SYSTEM, 
+                                  UX_ACTIVITY_SYSTEM_EVENT_ID_ON_ALLOWANCE, (void *)request_id, 0, (void *)acti_need_notify, 0, NULL);
+        g_manager_handler->handler.send_msg(&(g_manager_handler->handler), false, &msg); 
+    }
+}
+
 void ux_refresh_activity(ux_activity_context *self, ux_activity_context *target)
 {
     ux_msg msg;

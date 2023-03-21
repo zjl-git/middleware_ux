@@ -45,7 +45,7 @@ typedef enum {
     UX_ACTIVITY_SYSTEM_EVENT_ID_SET_RESULT,                     /*receiving a result*/
     UX_ACTIVITY_SYSTEM_EVENT_ID_TRIGGER_REFRESH,                /*refreshing*/
     UX_ACTIVITY_SYSTEM_EVENT_ID_REQUEST_ALLOWANCE,              /*request allowance*/
-    UX_ACTIVITY_SYSTEM_EVENT_ID_ON_ALLOWANCE,              /*on allowance*/
+    UX_ACTIVITY_SYSTEM_EVENT_ID_ON_ALLOWANCE,                   /*on allowance*/
 } ux_activity_event_id;
 
 typedef enum {
@@ -88,6 +88,12 @@ void ux_activity_start(void);
 void ux_activity_set_result(ux_activity_internal *target_acti, void *data, uint32_t data_len);
 
 void ux_activity_refresh_activity(ux_activity_internal *target_acti);
+
+void ux_activity_request_allowance(uint32_t request_id, ux_activity_internal *requester);
+
+ux_activity_internal *ux_activity_allow(ux_activity_internal *target_acti, uint32_t request_id);
+
+void ux_activity_allowed(uint32_t request_id, ux_activity_internal *requester);
 
 void ux_activity_traverse(uint32_t event_group, uint32_t event_id, void *data, uint32_t data_len);
 

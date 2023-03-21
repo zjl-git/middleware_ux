@@ -36,6 +36,10 @@ void ux_set_result(ux_activity_context *self, void *data, uint32_t data_len);
 
 void ux_refresh_activity(ux_activity_context *self, ux_activity_context *target);
 
+void ux_request_allowance(ux_activity_context *self, uint32_t request_id);
+
+void ux_grant_allowance(ux_activity_context *self, uint32_t request_id);
+
 #ifdef __cplusplus
 }
 #endif

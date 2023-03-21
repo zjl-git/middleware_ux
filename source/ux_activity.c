@@ -246,6 +246,45 @@ void ux_activity_request_allowance(uint32_t request_id, ux_activity_internal *re
     }
 }
 
+ux_activity_internal *ux_activity_allow(ux_activity_internal *target_acti, uint32_t request_id)
+{
+    ux_activity_waiting_allowed **wait_data = NULL;
+    ux_activity_temp_save **temp_saved_acti = NULL;
+    ux_activity_internal *acti_need_notify = NULL;
+
+    for (wait_data = &g_waiting_allowed_list; wait_data && *wait_data; wait_data = &(*wait_data)->next) {
+        if (request_id != (*wait_data)->request_id) {
+            continue;
+        }
+
+        for (temp_saved_acti = &(*wait_data)->waiting_acti_list; temp_saved_acti && *temp_saved_acti; temp_saved_acti = &(*temp_saved_acti)->next) {
+            if ((*temp_saved_acti)->acti == target_acti) {
+                ux_activity_temp_save *temp_activity_need_free = *temp_saved_acti;
+                *temp_saved_acti = (*temp_saved_acti)->next;
+                ux_ports_free(temp_activity_need_free);
+            }
+        }
+
+        if ((*wait_data)->waiting_acti_list == NULL) {
+            acti_need_notify = (*wait_data)->request_activity;
+            ux_activity_waiting_allowed *wait_data_need_free = *wait_data;
+            *wait_data = (*wait_data)->next;
+            ux_ports_free(wait_data_need_free);
+        } else {
+            wait_data = &(*wait_data)->next;
+        }
+        break;
+    }
+    return acti_need_notify;
+}
+
+void ux_activity_allowed(uint32_t request_id, ux_activity_internal *requester)
+{
+    if (requester) {
+        requester->proc_event_func(&requester->external_activity, UX_ACTIVITY_SYSTEM, UX_ACTIVITY_SYSTEM_EVENT_ID_ON_ALLOWANCE, (void *)request_id, 0);
+    }
+}
+
 void ux_activity_traverse(uint32_t event_group, uint32_t event_id, void *data, uint32_t data_len)
 {
     bool ret = false;
